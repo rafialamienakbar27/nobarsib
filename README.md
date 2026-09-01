@@ -121,3 +121,4 @@ ruang disk.
 di-cache. Status "Dikonfirmasi" berubah sampai menit terakhir menjelang kickoff;
 menyajikan daftar lama akan menghasilkan persis kesalahan yang paling ingin
 dihindari — data basi.
+# nobarsib
