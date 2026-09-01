@@ -1,0 +1,12 @@
+.env
+.env.local
+.env.production
+
+bin/
+tmp/
+*.test
+coverage.out
+
+.DS_Store
+.idea/
+.vscode/

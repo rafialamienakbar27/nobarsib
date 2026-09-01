@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS venue_photo;
+DROP TABLE IF EXISTS venue_facility;
+DROP TABLE IF EXISTS facility;
+DROP TABLE IF EXISTS venue;

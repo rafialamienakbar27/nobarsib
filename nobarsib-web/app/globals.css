@@ -1,0 +1,250 @@
+@import "tailwindcss";
+
+/*
+  Palet dibangun di sekitar biru #171B87 — biru yang diminta karena identik
+  dengan Persib.
+
+  Catatan hukum (§22: "Jangan pakai logo klub tanpa izin ... Pilih nama dan
+  identitas visual sendiri"): yang dilarang adalah lambang, nama, dan maskot
+  klub. Warna tunggal tidak bisa dimonopoli siapa pun, dan aplikasi ini tetap
+  memakai nama serta lambangnya sendiri. Yang harus dijaga: jangan pernah
+  menambahkan perisai, harimau, atau tulisan "PERSIB" sebagai identitas visual —
+  di situlah batasnya, bukan di warnanya.
+
+  DUA token biru, sengaja dipisah, karena keduanya tidak pernah bisa dipakai
+  bergantian:
+
+    --brand         BIDANG. Latar header, tombol utama, chip aktif.
+                    Selalu gelap, teksnya selalu putih.
+    --brand-accent  TEKS. Tautan dan label biru di atas latar halaman.
+                    Harus ikut terang di mode gelap, kalau tidak tak terbaca.
+
+  Menyatukan keduanya adalah jebakan yang sudah pasti terjadi di mode gelap:
+  satu token yang diterangkan demi teks akan mengubah tombol jadi biru pucat
+  bertulisan putih.
+*/
+:root {
+  /* Netral dicondongkan ke rona biru yang sama (hue ~237) supaya abu-abunya
+     terasa satu keluarga dengan biru utama, bukan abu-abu dingin yang asing. */
+  --bg: #f4f5fb;
+  --surface: #ffffff;
+  --surface-alt: #edeff8;
+  --border: #e0e3f1;
+  --text: #12142e;
+  --text-muted: #565b7b;
+  --text-faint: #858aac;
+
+  --brand: #171b87;
+  --brand-ink: #0f1266; /* dasar gradasi & keadaan tertekan */
+  --brand-lift: #2a31a8; /* sorotan di atas bidang biru */
+  --brand-accent: #1f2596;
+  --brand-soft: #e8eafa;
+  --brand-line: #c6cbee;
+  --on-brand: #ffffff;
+
+  /* Hijau konfirmasi. §13.3: badge "Dikonfirmasi" harus menonjol karena
+     itulah janji kepercayaan aplikasi.
+
+     Hijau dipertahankan justru KARENA halaman kini didominasi biru. Kalau
+     badge ini ikut kebiruan, sinyal terpenting di seluruh aplikasi akan
+     lebur ke latar dan berhenti berfungsi sebagai sinyal. */
+  --confirm: #0b6b3f;
+  --confirm-soft: #dcf3e6;
+  --confirm-line: #a9dcc1;
+
+  --warn: #8a5209;
+  --warn-soft: #fcefd4;
+
+  --ring: color-mix(in srgb, var(--brand-accent) 55%, transparent);
+  --shadow-card: 0 1px 2px rgb(18 20 46 / 0.05), 0 1px 3px rgb(18 20 46 / 0.04);
+  --shadow-brand: 0 6px 20px -6px rgb(23 27 135 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0c1c;
+    --surface: #14162c;
+    --surface-alt: #1d203c;
+    --border: #292d51;
+    --text: #e7e9f7;
+    --text-muted: #9aa0c4;
+    --text-faint: #6d7398;
+
+    /* Bidang biru dinaikkan sedikit: #171B87 di atas latar #0b0c1c hampir
+       tidak terbaca sebagai bidang tersendiri. */
+    --brand: #232a9e;
+    --brand-ink: #171b87;
+    --brand-lift: #3a43c4;
+    --brand-accent: #9aa2f0;
+    --brand-soft: #1c2050;
+    --brand-line: #333972;
+    --on-brand: #ffffff;
+
+    --confirm: #5cd39a;
+    --confirm-soft: #10301f;
+    --confirm-line: #1e5138;
+
+    --warn: #e8c17a;
+    --warn-soft: #2e2410;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-brand: 0 6px 20px -6px rgb(0 0 0 / 0.6);
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-lift: var(--brand-lift);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-line: var(--brand-line);
+  --color-on-brand: var(--on-brand);
+
+  --color-confirm: var(--confirm);
+  --color-confirm-soft: var(--confirm-soft);
+  --color-confirm-line: var(--confirm-line);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-brand: var(--shadow-brand);
+}
+
+html {
+  color-scheme: light dark;
+}
+
+/*
+  Wadah tunggal untuk header, konten, dan footer.
+
+  Lebarnya 72rem (1152px), bukan 48rem seperti sebelumnya. Aplikasi ini memang
+  dirancang mobile-first, tapi kolom selebar HP yang dibiarkan mengambang di
+  tengah layar 27 inci membuat dua pertiga jendela jadi bidang kosong — dan
+  daftar venue yang seharusnya bisa dipindai sekilas malah jadi gulungan
+  panjang. Di atas 1152px, ruang sisanya dipakai untuk MENAMBAH KOLOM kartu
+  (lihat grid di NobarList), bukan untuk melebarkan satu kartu tanpa batas.
+
+  Padding ikut naik bersama lebar layar. Elemen yang sengaja "bocor" ke tepi —
+  galeri foto dan baris chip — hanya melakukannya di bawah 640px, di mana
+  paddingnya pasti 1rem; di atas itu keduanya berganti jadi tata letak yang
+  membungkus, jadi tidak ada nilai negatif yang perlu ikut disesuaikan.
+*/
+.wadah {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 72rem;
+  padding-inline: 1rem;
+}
+@media (min-width: 640px) {
+  .wadah {
+    padding-inline: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .wadah {
+    padding-inline: 2rem;
+  }
+}
+/* Di monitor lebar, wadahnya ikut melebar satu langkah — tapi berhenti di
+   80rem. Tanpa batas atas, tiga kolom kartu akan terus melar sampai satu kartu
+   selebar 600px lagi-lagi berisi lima baris teks pendek; masalah yang sama,
+   hanya bergeser ke layar yang lebih besar. */
+@media (min-width: 1536px) {
+  .wadah {
+    max-width: 80rem;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  /* Font sistem: tidak ada webfont yang diunduh, jadi tidak ada teks yang
+     berkedip dan tidak ada permintaan tambahan di jaringan lambat (§13.6). */
+  font-family:
+    system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/*
+  Bidang biru utama: header dan kartu laga.
+
+  Gradasinya sangat tipis (dua langkah dari palet yang sama) — cukup untuk
+  memberi kedalaman pada bidang selebar layar, tidak sampai terbaca sebagai
+  "gradien" yang akan cepat terasa usang.
+*/
+.bidang-brand {
+  background-image: linear-gradient(160deg, var(--brand-lift) -35%, var(--brand) 45%, var(--brand-ink) 130%);
+  color: var(--on-brand);
+}
+
+/*
+  Judul bagian dengan garis biru pendek di kiri.
+
+  Halaman detail venue (§13.4) menumpuk delapan blok beruntun; tanpa penanda,
+  semuanya terbaca sebagai satu aliran teks panjang. Garis ini memberi ritme
+  tanpa menambah satu kata pun ke halaman.
+
+  Memakai --brand-accent, bukan --brand: di mode gelap bidang biru tuanya
+  hampir tidak terlihat di atas latar gelap.
+*/
+.judul-bagian {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.judul-bagian::before {
+  content: "";
+  width: 3px;
+  height: 1.05em;
+  flex: none;
+  border-radius: 2px;
+  background: var(--brand-accent);
+}
+
+/* Sembunyikan scrollbar pada baris chip filter yang bisa digeser. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Kerangka pemuatan. Dimatikan untuk yang tidak nyaman dengan animasi. */
+@keyframes denyut {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.denyut {
+  animation: denyut 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .denyut {
+    animation: none;
+  }
+}
+
+/* Target sentuh minimal 44px di seluruh tombol dan tautan aksi — diuji di HP
+   Android kelas menengah, bukan dengan kursor (checklist §23). */
+a, button {
+  touch-action: manipulation;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Di atas bidang biru, cincin fokus biru tidak terlihat. */
+.bidang-brand :focus-visible {
+  outline-color: #ffffff;
+}

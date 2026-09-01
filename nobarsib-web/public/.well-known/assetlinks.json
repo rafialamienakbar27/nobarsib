@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "id.nobarsib.app",
+      "sha256_cert_fingerprints": [
+        "55:2A:76:2F:A5:19:24:27:85:E2:F2:66:38:E2:9E:C4:4E:B5:7F:76:1C:73:67:20:38:B0:2D:D4:98:7E:80:27"
+      ]
+    }
+  }
+]

@@ -1,0 +1,124 @@
+# Lingkungan development NOBARSIB (blueprint §17.2)
+#
+# Diletakkan di root proyek, bukan di dalam nobarsib-api/, karena compose ini
+# mengorkestrasi dua aplikasi: nobarsib-api (Fase 1) dan nobarsib-web (Fase 3).
+# Blueprint §6.4 menaruhnya di dalam nobarsib-api/ tapi §17.2 membangun
+# ./nobarsib-web dari sana — dua hal itu tidak bisa benar bersamaan.
+#
+# Kunci `version:` sengaja tidak dipakai; Compose v2 menganggapnya usang.
+
+services:
+  db:
+    # postgis/postgis tidak menerbitkan varian arm64 (sudah dicek untuk tag
+    # 16-3.4, 16-3.4-alpine, dan 16-3.5-alpine — semuanya amd64). Di Apple
+    # Silicon image ini berjalan lewat emulasi, dan Docker akan memperingatkan
+    # "platform mismatch" setiap kali container dibuat. Itu wajar, bukan salah
+    # konfigurasi: query jadi beberapa kali lebih lambat di lokal, sementara
+    # produksi berjalan di VPS amd64 (§17.1) tanpa emulasi.
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: nobarsib
+      POSTGRES_USER: nobarsib
+      POSTGRES_PASSWORD: devpassword
+    # Port host sengaja 5434, bukan 5432/5433.
+    #
+    # Mesin ini menjalankan Homebrew postgresql@16 yang dikonfigurasi di 5433
+    # (lihat `port = 5433` di /opt/homebrew/var/postgresql@16/postgresql.conf),
+    # dan Homebrew mengikat 127.0.0.1 secara spesifik sehingga selalu menang
+    # atas binding 0.0.0.0 milik Docker saat host menghubungi "localhost".
+    #
+    # Gejalanya menyesatkan: `psql` dari host tampak berhasil tapi berisi
+    # database proyek lain, sementara `docker compose exec db psql` benar.
+    # Kalau ragu, pastikan dengan:
+    #   psql "$DATABASE_URL" -tAc "select current_setting('data_directory')"
+    # Container menjawab /var/lib/postgresql/data.
+    ports: ["${POSTGRES_HOST_PORT:-5434}:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # Wajib lewat TCP (-h 127.0.0.1), bukan unix socket.
+      #
+      # Saat volume masih kosong, entrypoint Postgres menjalankan server
+      # sementara yang HANYA mendengarkan unix socket untuk menjalankan initdb,
+      # lalu me-restart server sungguhan. `pg_isready` tanpa -h menjawab
+      # "accepting connections" pada fase itu, sehingga service dinyatakan
+      # healthy padahal koneksi dari host masih putus dengan error "EOF".
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U nobarsib -d nobarsib"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    ports: ["${REDIS_HOST_PORT:-6379}:6379"]
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: ./nobarsib-api
+    # Ditandai supaya `worker` bisa memakai ulang image yang sama.
+    image: nobarsib-api:local
+    depends_on:
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      APP_ENV: development
+      PORT: "8080"
+      DATABASE_URL: postgres://nobarsib:devpassword@db:5432/nobarsib?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      # Rahasia development. Config loader menolak nilai seperti ini kalau
+      # APP_ENV=production, jadi tidak bisa diam-diam terbawa ke server.
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-minimal-32-karakter}
+      DEVICE_HASH_SALT: ${DEVICE_HASH_SALT:-dev-only-device-salt-minimal-32-karakter}
+      # Origin browser, bukan alamat internal container. Halaman dibuka orang di
+      # http://localhost:3000, jadi itulah Origin yang dikirim browser — bukan
+      # http://web:3000, yang hanya berlaku di dalam jaringan compose.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    ports: ["8080:8080"]
+    restart: unless-stopped
+
+  worker:
+    # Sengaja tanpa `build:`. Dockerfile nobarsib-api sudah menghasilkan kedua
+    # biner (/app/api dan /app/worker), jadi membangunnya dua kali hanya
+    # menggandakan waktu build dan memori — dan pada VM 2 GB, kompilasi Go yang
+    # berjalan paralel memang dihentikan paksa oleh kernel.
+    image: nobarsib-api:local
+    command: ["/app/worker"]
+    depends_on:
+      api: { condition: service_started }
+      db: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgres://nobarsib:devpassword@db:5432/nobarsib?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-minimal-32-karakter}
+      DEVICE_HASH_SALT: ${DEVICE_HASH_SALT:-dev-only-device-salt-minimal-32-karakter}
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./nobarsib-web
+      args:
+        # NEXT_PUBLIC_* ditanam saat build karena ikut masuk ke bundel yang
+        # diunduh browser. Nilainya harus alamat yang terlihat dari luar
+        # container — "api:8080" hanya berarti sesuatu di dalam jaringan Docker.
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/v1}
+        NEXT_PUBLIC_ADMIN_WA: ${NEXT_PUBLIC_ADMIN_WA:-}
+    depends_on: [api]
+    environment:
+      # Dipakai server Next saat merender halaman, dari dalam jaringan Docker.
+      API_URL: http://api:8080/v1
+    ports: ["3000:3000"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:

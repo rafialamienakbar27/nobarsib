@@ -1,0 +1,25 @@
+# Jaring pengaman kalau `vercel` tidak sengaja dijalankan dari akar proyek.
+#
+# Deploy yang benar dilakukan dari dalam nobarsib-web/ (lihat DEPLOY.md), dan
+# di situ berkas ini tidak terpakai. Tapi menjalankannya dari akar berarti
+# SELURUH folder diunggah ke Vercel — termasuk kunci penandatanganan Android,
+# yang tidak boleh meninggalkan mesin ini dalam keadaan apa pun.
+
+# Kunci penandatanganan Android dan sandinya.
+nobarsib-android/android.keystore
+nobarsib-android/signing.env
+
+# Berkas lingkungan berisi kredensial.
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Bukan bagian dari situs.
+nobarsib-api/
+nobarsib-android/
+*.md
+
+# Keluaran build dan dependensi.
+**/node_modules
+**/.next
+**/bin

@@ -1,0 +1,76 @@
+[
+  {
+    "_catatan": "TEMPLATE — salin berkas ini jadi venues.json lalu isi dengan hasil survei lapangan §16.4. Field _catatan diabaikan importer, pakai untuk catatanmu sendiri.",
+
+    "name": "Sekawan Kopi & Space",
+    "slug": "sekawan-kopi-space",
+    "address": "Jl. Terusan Jakarta No.00, Antapani",
+    "district": "Antapani",
+    "city": "Kota Bandung",
+
+    "lat": -6.9147,
+    "lng": 107.6595,
+
+    "phone": "",
+    "whatsapp": "628xxxxxxxxxx",
+    "instagram_handle": "sekawankopi",
+
+    "google_place_id": "",
+    "google_rating": 4.6,
+    "google_rating_count": 700,
+
+    "opening_hours": {
+      "0": { "open": "10:00", "close": "24:00" },
+      "1": { "open": "10:00", "close": "23:00" },
+      "2": { "open": "10:00", "close": "23:00" },
+      "3": { "open": "10:00", "close": "23:00" },
+      "4": { "open": "10:00", "close": "24:00" },
+      "5": { "open": "10:00", "close": "02:00" },
+      "6": { "open": "10:00", "close": "02:00" }
+    },
+
+    "facilities": [
+      "layar_besar",
+      "sound_system",
+      "outdoor",
+      "parkir_motor",
+      "musala"
+    ],
+
+    "photos": [
+      { "url": "https://foto.contoh.id/sekawan-1.webp", "caption": "Area outdoor", "is_primary": true }
+    ],
+
+    "status": "verified"
+  },
+
+  {
+    "_catatan": "Contoh venue yang tutup di hari tertentu. Hari tutup WAJIB ditulis sebagai null — kalau harinya tidak disebut sama sekali, sistem menganggapnya 'tidak diketahui' dan venue tetap muncul di daftar.",
+
+    "name": "MMB Cafe",
+    "slug": "mmb-cafe",
+    "address": "Jl. Batununggal Indah, Bandung",
+    "district": "Batununggal",
+    "city": "Kota Bandung",
+
+    "lat": -6.9450,
+    "lng": 107.6320,
+
+    "whatsapp": "628xxxxxxxxxx",
+    "instagram_handle": "mmbcafe",
+
+    "opening_hours": {
+      "0": { "open": "16:00", "close": "02:00" },
+      "1": null,
+      "2": { "open": "16:00", "close": "02:00" },
+      "3": { "open": "16:00", "close": "02:00" },
+      "4": { "open": "16:00", "close": "02:00" },
+      "5": { "open": "16:00", "close": "02:00" },
+      "6": { "open": "16:00", "close": "02:00" }
+    },
+
+    "facilities": ["layar_besar", "indoor", "parkir_mobil", "parkir_motor"],
+    "photos": [],
+    "status": "unclaimed"
+  }
+]

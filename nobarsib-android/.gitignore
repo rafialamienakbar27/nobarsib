@@ -1,0 +1,14 @@
+# Kunci penandatanganan dan sandinya TIDAK BOLEH masuk ke repositori.
+# Siapa pun yang punya keduanya bisa menerbitkan pembaruan palsu yang
+# dipercaya penuh oleh HP yang sudah memasang aplikasi ini.
+android.keystore
+signing.env
+
+# Hasil build — dibangun ulang lewat ./build.sh, bukan disimpan.
+app-release-signed.apk
+app-release-signed.apk.idsig
+app-release-unsigned-aligned.apk
+app-release-bundle.aab
+build/
+app/build/
+.gradle/
