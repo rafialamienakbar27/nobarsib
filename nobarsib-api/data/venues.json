@@ -1,6 +1,6 @@
 [
   {
-    "_catatan": "Data profil sungguhan, BUKAN fixture. Dimuat dengan `make import FILE=nobarsib-api/data/venues.json`, idempoten berdasarkan slug. Sengaja tidak ditaruh di testdata/ karena isi folder itu dihapus total setiap `make fixture` dijalankan.",
+    "_catatan": "Data profil sungguhan, BUKAN fixture. Dimuat dengan `make import FILE=nobarsib-api/data/venues.json`, idempoten berdasarkan slug. Sengaja tidak ditaruh di testdata/ karena isi folder itu dihapus total setiap `make fixture` dijalankan. FOTO: yang terpasang adalah logo, bukan foto tempat, dan URL-nya relatif ke situs sendiri (nobarsib-web/public/venue/) — bukan host luar. Cloudflare R2 (§6.1) baru disiapkan Fase 4, dan menautkan gambar ke domain yang belum tentu hidup adalah persis kesalahan yang membuat seluruh venue tampil dengan gambar rusak sebelum ini.",
 
     "name": "150 Coffee Garden",
     "slug": "150-coffee-garden",
@@ -42,7 +42,13 @@
       "wifi"
     ],
 
-    "photos": [],
+    "photos": [
+      {
+        "url": "/venue/150-coffee-garden.webp",
+        "caption": "Logo 150 Coffee Garden",
+        "is_primary": true
+      }
+    ],
 
     "status": "verified",
 
