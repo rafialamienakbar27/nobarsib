@@ -17,6 +17,24 @@ const (
 	VenueSuspended = "suspended"
 )
 
+// Asal data profil venue. Nilainya dijaga juga oleh CHECK di migrasi 000008 —
+// dua lapis, karena importer bukan satu-satunya yang menulis ke tabel ini.
+const (
+	SumberGooglePlaces = "google-places" // disalin dari Google Places
+	SumberVenue        = "venue"         // dilaporkan pemilik/pengelola
+	SumberManual       = "manual"        // diketik kami setelah survei (§16.4)
+)
+
+// SumberDataValid dipakai importer dan handler admin sebelum menulis.
+func SumberDataValid(s string) bool {
+	switch s {
+	case "", SumberGooglePlaces, SumberVenue, SumberManual:
+		return true
+	default:
+		return false
+	}
+}
+
 type Venue struct {
 	ID       uuid.UUID
 	Name     string
@@ -30,7 +48,16 @@ type Venue struct {
 	Phone           string
 	WhatsApp        string
 	InstagramHandle string
+	Website         string
 	GooglePlaceID   string
+
+	// Asal-usul data profil (migrasi 000008).
+	//
+	// Keduanya pointer/kosong-able karena "tidak diketahui" adalah keadaan yang
+	// sah dan umum: seluruh venue yang masuk sebelum kolom ini ada memang tidak
+	// punya jawabannya, dan menebak untuk mereka lebih buruk daripada diam.
+	DataSource     string
+	LastVerifiedAt *time.Time
 
 	GoogleRating      *float64
 	GoogleRatingCount *int

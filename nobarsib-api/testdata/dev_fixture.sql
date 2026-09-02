@@ -114,10 +114,17 @@ SELECT v.id, f.id FROM venue v, facility f
 WHERE v.slug = 'kedai-tutup-cepat' AND f.code IN ('layar_besar','indoor');
 
 -- ------------------------------------------------------------------ foto
+-- contoh.test sengaja TIDAK bisa diakses: ia menguji jalur gambar gagal muat.
+--
+-- 150-coffee-garden dikeluarkan dari daftar ini karena datanya sudah diisi
+-- sungguhan lewat data/venues.json, dan importer tidak pernah MENGHAPUS foto —
+-- ia hanya menambah yang URL-nya belum ada. Kalau slug itu tetap di sini,
+-- setiap `make fixture` akan memasang kembali foto rusaknya dan impor
+-- berikutnya tidak akan membersihkannya.
 INSERT INTO venue_photo (venue_id, url, is_primary)
 SELECT id, 'https://contoh.test/' || slug || '.webp', TRUE
 FROM venue WHERE slug IN ('jabarano-coffee-angklung','ludo-sports-kitchen',
-                          'sekawan-kopi-space','150-coffee-garden','kedai-tutup-cepat');
+                          'sekawan-kopi-space','kedai-tutup-cepat');
 
 -- ------------------------------------------------------------ nobar event
 INSERT INTO nobar_event (venue_id, match_id, doors_open_at, entry_type, entry_amount,

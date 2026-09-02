@@ -147,6 +147,7 @@ type venueDetailDTO struct {
 	Phone            string                `json:"phone,omitempty"`
 	WhatsApp         string                `json:"whatsapp,omitempty"`
 	InstagramHandle  string                `json:"instagram_handle,omitempty"`
+	Website          string                `json:"website,omitempty"`
 	GoogleRating     *float64              `json:"google_rating"`
 	NobarRating      *float64              `json:"nobar_rating"`
 	NobarRatingCount int                   `json:"nobar_rating_count"`
@@ -154,6 +155,11 @@ type venueDetailDTO struct {
 	KidFriendlyScore *float64              `json:"kid_friendly_score"`
 	DataCompleteness float64               `json:"data_completeness"`
 	Status           string                `json:"status"`
+	// Asal-usul data profil. Keduanya omitempty: venue yang tidak diketahui
+	// asalnya lebih baik tidak menyebut apa-apa daripada mengirim string kosong
+	// yang di sisi klien gampang terbaca sebagai "sudah diverifikasi".
+	DataSource     string `json:"data_source,omitempty"`
+	LastVerifiedAt string `json:"last_verified_at,omitempty"`
 	Facilities       []string              `json:"facilities"`
 	Photos           []photoDTO            `json:"photos"`
 	OpeningHours     map[string]openDayDTO `json:"opening_hours"`
@@ -221,16 +227,29 @@ func newVenueDetailDTO(d *service.VenueDetail) venueDetailDTO {
 		history = append(history, item)
 	}
 
+	// Tanggal saja, tanpa jam dan tanpa zona waktu — sama seperti kolomnya di
+	// basis data. Mengirimnya sebagai RFC3339 akan menambahkan "T00:00:00Z"
+	// yang bukan cuma berisik, tapi keliru: itu tengah malam UTC, yaitu pukul
+	// tujuh pagi WIB di hari yang sama, dan pembaca yang teliti akan menyimpulkan
+	// jam verifikasi yang tidak pernah kami catat.
+	var diverifikasi string
+	if v.LastVerifiedAt != nil {
+		diverifikasi = v.LastVerifiedAt.Format("2006-01-02")
+	}
+
 	return venueDetailDTO{
 		ID: v.ID, Name: v.Name, Slug: v.Slug, Address: v.Address,
 		District: v.District, City: v.City, Lat: v.Lat, Lng: v.Lng,
 		Phone: v.Phone, WhatsApp: v.WhatsApp, InstagramHandle: v.InstagramHandle,
+		Website:      v.Website,
 		GoogleRating: v.GoogleRating, NobarRating: v.NobarRating,
 		NobarRatingCount: v.NobarRatingCount,
 		KondusifScore:    v.VisibleKondusif(),
 		KidFriendlyScore: v.VisibleKidFriendly(),
 		DataCompleteness: v.DataCompleteness,
 		Status:           v.Status,
+		DataSource:       v.DataSource,
+		LastVerifiedAt:   diverifikasi,
 		Facilities:       facilities,
 		Photos:           photos,
 		OpeningHours:     hours,

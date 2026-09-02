@@ -22,9 +22,11 @@ const venueColumns = `
     v.id, v.name, v.slug, v.address, COALESCE(v.district,''), v.city,
     ST_Y(v.location::geometry), ST_X(v.location::geometry),
     COALESCE(v.phone,''), COALESCE(v.whatsapp,''), COALESCE(v.instagram_handle,''),
-    COALESCE(v.google_place_id,''), v.google_rating, v.google_rating_count,
+    COALESCE(v.website,''), COALESCE(v.google_place_id,''),
+    v.google_rating, v.google_rating_count,
     v.opening_hours, v.nobar_rating, v.nobar_rating_count, v.kondusif_score,
     v.kid_friendly_score, v.data_completeness, v.status, v.is_active,
+    COALESCE(v.data_source,''), v.last_verified_at,
     v.created_at, v.updated_at`
 
 func scanVenue(row pgx.Row) (*domain.Venue, error) {
@@ -34,9 +36,10 @@ func scanVenue(row pgx.Row) (*domain.Venue, error) {
 	)
 	err := row.Scan(&v.ID, &v.Name, &v.Slug, &v.Address, &v.District, &v.City,
 		&v.Lat, &v.Lng, &v.Phone, &v.WhatsApp, &v.InstagramHandle,
-		&v.GooglePlaceID, &v.GoogleRating, &v.GoogleRatingCount,
+		&v.Website, &v.GooglePlaceID, &v.GoogleRating, &v.GoogleRatingCount,
 		&raw, &v.NobarRating, &v.NobarRatingCount, &v.KondusifScore,
 		&v.KidFriendlyScore, &v.DataCompleteness, &v.Status, &v.IsActive,
+		&v.DataSource, &v.LastVerifiedAt,
 		&v.CreatedAt, &v.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, domain.ErrNotFound
@@ -159,15 +162,18 @@ func (r *VenueRepo) Create(ctx context.Context, v *domain.Venue) error {
 
 	const q = `
 INSERT INTO venue (name, slug, address, district, city, location, phone, whatsapp,
-                   instagram_handle, google_place_id, google_rating, google_rating_count,
-                   opening_hours, status)
+                   instagram_handle, website, google_place_id, google_rating,
+                   google_rating_count, opening_hours, status,
+                   data_source, last_verified_at)
 VALUES ($1,$2,$3,NULLIF($4,''),$5, ST_SetSRID(ST_MakePoint($7,$6),4326)::geography,
-        NULLIF($8,''),NULLIF($9,''),NULLIF($10,''),NULLIF($11,''),$12,$13,$14,$15)
+        NULLIF($8,''),NULLIF($9,''),NULLIF($10,''),NULLIF($11,''),NULLIF($12,''),
+        $13,$14,$15,$16,NULLIF($17,''),$18)
 RETURNING id, created_at, updated_at`
 
 	err = r.db.QueryRow(ctx, q, v.Name, v.Slug, v.Address, v.District, v.City,
-		v.Lat, v.Lng, v.Phone, v.WhatsApp, v.InstagramHandle, v.GooglePlaceID,
-		v.GoogleRating, v.GoogleRatingCount, hours, v.Status,
+		v.Lat, v.Lng, v.Phone, v.WhatsApp, v.InstagramHandle, v.Website,
+		v.GooglePlaceID, v.GoogleRating, v.GoogleRatingCount, hours, v.Status,
+		v.DataSource, v.LastVerifiedAt,
 	).Scan(&v.ID, &v.CreatedAt, &v.UpdatedAt)
 
 	if isUniqueViolation(err) {
@@ -190,13 +196,19 @@ UPDATE venue SET
     name = $2, address = $3, district = NULLIF($4,''), city = $5,
     location = ST_SetSRID(ST_MakePoint($7,$6),4326)::geography,
     phone = NULLIF($8,''), whatsapp = NULLIF($9,''),
-    instagram_handle = NULLIF($10,''), google_rating = $11,
-    google_rating_count = $12, opening_hours = $13, status = $14, is_active = $15
+    instagram_handle = NULLIF($10,''), website = NULLIF($11,''),
+    google_rating = $12, google_rating_count = $13, opening_hours = $14,
+    status = $15, is_active = $16,
+    -- COALESCE, bukan penugasan langsung: pembaruan yang tidak menyebut
+    -- asal-usulnya tidak boleh menghapus asal-usul yang sudah tercatat.
+    data_source = COALESCE(NULLIF($17,''), data_source),
+    last_verified_at = COALESCE($18, last_verified_at)
 WHERE id = $1`
 
 	tag, err := r.db.Exec(ctx, q, v.ID, v.Name, v.Address, v.District, v.City,
-		v.Lat, v.Lng, v.Phone, v.WhatsApp, v.InstagramHandle,
-		v.GoogleRating, v.GoogleRatingCount, hours, v.Status, v.IsActive)
+		v.Lat, v.Lng, v.Phone, v.WhatsApp, v.InstagramHandle, v.Website,
+		v.GoogleRating, v.GoogleRatingCount, hours, v.Status, v.IsActive,
+		v.DataSource, v.LastVerifiedAt)
 	if err != nil {
 		return fmt.Errorf("ubah venue: %w", err)
 	}

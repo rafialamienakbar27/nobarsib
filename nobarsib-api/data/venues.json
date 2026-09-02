@@ -1,0 +1,52 @@
+[
+  {
+    "_catatan": "Data profil sungguhan, BUKAN fixture. Dimuat dengan `make import FILE=nobarsib-api/data/venues.json`, idempoten berdasarkan slug. Sengaja tidak ditaruh di testdata/ karena isi folder itu dihapus total setiap `make fixture` dijalankan.",
+
+    "name": "150 Coffee Garden",
+    "slug": "150-coffee-garden",
+    "address": "Jl. Sulaksana No. 50, Cicaheum, Kec. Kiaracondong, Kota Bandung, Jawa Barat 40282",
+    "district": "Cicaheum, Kiaracondong",
+    "city": "Kota Bandung",
+
+    "lat": -6.9086815,
+    "lng": 107.6492045,
+
+    "phone": "",
+    "whatsapp": "6281222809995",
+    "instagram_handle": "150coffeegarden",
+    "website": "https://150coffeegarden.com/",
+
+    "google_place_id": "",
+    "google_rating": 4.7,
+    "google_rating_count": 1500,
+
+    "opening_hours": {
+      "0": { "open": "07:00", "close": "23:00" },
+      "1": { "open": "07:00", "close": "23:00" },
+      "2": { "open": "07:00", "close": "23:00" },
+      "3": { "open": "07:00", "close": "23:00" },
+      "4": { "open": "07:00", "close": "23:00" },
+      "5": { "open": "07:00", "close": "24:00" },
+      "6": { "open": "07:00", "close": "24:00" }
+    },
+
+    "facilities": [
+      "parkir_mobil",
+      "parkir_motor",
+      "area_anak",
+      "musala",
+      "outdoor",
+      "indoor",
+      "toilet_bersih",
+      "layar_besar",
+      "wifi"
+    ],
+
+    "photos": [],
+
+    "status": "verified",
+
+    "data_source": "google-places",
+    "last_verified_at": "2026-09-02"
+  }
+]

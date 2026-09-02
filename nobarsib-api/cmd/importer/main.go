@@ -42,7 +42,10 @@ type venueInput struct {
 	Phone           string                    `json:"phone"`
 	WhatsApp        string                    `json:"whatsapp"`
 	InstagramHandle string                    `json:"instagram_handle"`
+	Website         string                    `json:"website"`
 	GooglePlaceID   string                    `json:"google_place_id"`
+	DataSource      string                    `json:"data_source"`
+	LastVerifiedAt  string                    `json:"last_verified_at"` // "2026-09-02"
 	GoogleRating    *float64                  `json:"google_rating"`
 	GoogleCount     *int                      `json:"google_rating_count"`
 	OpeningHours    map[string]*openhours.Day `json:"opening_hours"`
@@ -224,6 +227,18 @@ func periksa(v venueInput) []string {
 		}
 	}
 
+	if !domain.SumberDataValid(v.DataSource) {
+		m = append(m, fmt.Sprintf(
+			"data_source %q tidak dikenal (pilih: %s, %s, %s, atau kosongkan)",
+			v.DataSource, domain.SumberGooglePlaces, domain.SumberVenue, domain.SumberManual))
+	}
+	if v.LastVerifiedAt != "" {
+		if _, err := time.Parse("2006-01-02", v.LastVerifiedAt); err != nil {
+			m = append(m, fmt.Sprintf(
+				"last_verified_at %q bukan tanggal YYYY-MM-DD", v.LastVerifiedAt))
+		}
+	}
+
 	primer := 0
 	for _, p := range v.Photos {
 		if p.URL == "" {
@@ -244,8 +259,17 @@ func (in venueInput) toDomain() *domain.Venue {
 		Name: in.Name, Slug: in.Slug, Address: in.Address, District: in.District,
 		City: in.City, Lat: in.Lat, Lng: in.Lng, Phone: in.Phone,
 		WhatsApp: in.WhatsApp, InstagramHandle: in.InstagramHandle,
+		Website:       in.Website,
 		GooglePlaceID: in.GooglePlaceID, GoogleRating: in.GoogleRating,
 		GoogleRatingCount: in.GoogleCount, Status: in.Status, IsActive: true,
+		DataSource: in.DataSource,
+	}
+	// Sudah divalidasi periksa(), jadi kesalahan format di sini tidak mungkin
+	// terjadi tanpa melewati pemeriksaan lebih dulu.
+	if in.LastVerifiedAt != "" {
+		if t, err := time.Parse("2006-01-02", in.LastVerifiedAt); err == nil {
+			v.LastVerifiedAt = &t
+		}
 	}
 	if v.Slug == "" {
 		v.Slug = service.Slugify(v.Name)

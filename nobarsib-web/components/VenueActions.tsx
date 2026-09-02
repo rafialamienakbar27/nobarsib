@@ -63,14 +63,37 @@ export function VenueActions({
         </span>
       )}
 
+      {/*
+        Instagram dan situs adalah tautan sekunder: keduanya berbagi satu baris
+        kalau sama-sama ada, dan mengambil baris penuh kalau sendirian. Yang
+        tidak boleh terjadi adalah salah satunya naik menyaingi "Buka di Maps",
+        karena klik Maps-lah yang menandakan niat datang (§15.4).
+      */}
       {venue.instagram_handle && (
         <a
           href={instagramLink(venue.instagram_handle)}
           target="_blank"
           rel="noopener noreferrer"
-          className="col-span-2 flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-muted"
+          className={
+            "flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-muted transition-colors hover:border-brand-line " +
+            (venue.website ? "" : "col-span-2")
+          }
         >
           @{venue.instagram_handle.replace(/^@/, "")} di Instagram
+        </a>
+      )}
+
+      {venue.website && (
+        <a
+          href={venue.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={
+            "flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-muted transition-colors hover:border-brand-line " +
+            (venue.instagram_handle ? "" : "col-span-2")
+          }
+        >
+          Situs resmi
         </a>
       )}
     </div>

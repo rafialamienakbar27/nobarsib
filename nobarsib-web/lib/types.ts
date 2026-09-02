@@ -105,6 +105,7 @@ export interface VenueDetail {
   phone?: string;
   whatsapp?: string;
   instagram_handle?: string;
+  website?: string;
   google_rating: number | null;
   nobar_rating: number | null;
   nobar_rating_count: number;
@@ -112,6 +113,16 @@ export interface VenueDetail {
   kid_friendly_score: number | null;
   data_completeness: number;
   status: string;
+  /**
+   * Asal data profil dan kapan terakhir dipastikan manusia.
+   *
+   * Opsional, dan itu bukan kelalaian: venue yang masuk sebelum kolom ini ada
+   * memang tidak diketahui asalnya, dan API sengaja menghilangkan field-nya
+   * (`omitempty`) daripada mengirim string kosong yang gampang terbaca sebagai
+   * "sudah diverifikasi".
+   */
+  data_source?: "google-places" | "venue" | "manual";
+  last_verified_at?: string; // "2026-09-02"
   facilities: string[];
   photos: VenuePhoto[];
   opening_hours: Record<string, { open: string; close: string }>;
